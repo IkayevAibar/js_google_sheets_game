@@ -1,28 +1,144 @@
+function clear_protection(){
+  var ss = SpreadsheetApp.getActive();
+  var protections = ss.getProtections(SpreadsheetApp.ProtectionType.RANGE);
+  for (var i = 0; i < protections.length; i++) {
+    var protection = protections[i];
+    if (protection.canEdit()) {
+      protection.remove();
+    }
+  }
+}
+
 function onlyUnique(value, index, self) {
   return self.indexOf(value) === index;
 }
-function get_country_info(){
-  var rocket_tech=false;
-  var rockets=0;
-  var city_1={shield:0,status:1}
-  var city_2={shield:0,status:0.8}
-  var city_3={shield:0,status:0.6}
-  var city_4={shield:0,status:0.4}
-  var money = 160;
 
-  var country = {
-    rocket_tech:rocket_tech,
-    rockets:rockets,
-    city_1:city_1,
-    city_2:city_2,
-    city_3:city_3,
-    city_4:city_4,
-    money:money,
+function get_countries(){
+  var doc = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1hxxIlHxJ1ZuIrkddn30twDj9Y_iTLmvHSwc1XDUdDXw/edit');
+  
+  let countries = {
+    country_1:get_country('https://docs.google.com/spreadsheets/d/16qAxCOpBEK0ndtuEwuKsN500gA0K1Xbr3wT5p3cffvU/edit'),
+    country_2:get_country('https://docs.google.com/spreadsheets/d/16qAxCOpBEK0ndtuEwuKsN500gA0K1Xbr3wT5p3cffvU/edit'),
+    country_3:get_country('https://docs.google.com/spreadsheets/d/16qAxCOpBEK0ndtuEwuKsN500gA0K1Xbr3wT5p3cffvU/edit'),
+    country_4:get_country('https://docs.google.com/spreadsheets/d/16qAxCOpBEK0ndtuEwuKsN500gA0K1Xbr3wT5p3cffvU/edit'),
+    country_5:get_country('https://docs.google.com/spreadsheets/d/16qAxCOpBEK0ndtuEwuKsN500gA0K1Xbr3wT5p3cffvU/edit'),
+    country_6:get_country('https://docs.google.com/spreadsheets/d/16qAxCOpBEK0ndtuEwuKsN500gA0K1Xbr3wT5p3cffvU/edit'),
   }
+}
+function get_country(country_doc){
+  // var country_doc= SpreadsheetApp.openByUrl();
+  let country = {
+    country_name:country_doc.getRange('B5').getValue().toString().trim(),
+    rocket_tech:country_doc.getRange('C21').getValue(),
+    rockets:country_doc.getRange('E18').getValue(),
+    money:country_doc.getRange('G5').getValue(),
+    city_1:{
+      city_name:country_doc.getRange('B8').getValue().toString().trim(),
+      shield:country_doc.getRange('B25').getValue(),
+      status:country_doc.getRange('B26').getValue()
+    },
+    city_2:{
+        city_name:country_doc.getRange('C8').getValue().toString().trim(),
+        shield:country_doc.getRange('C25').getValue(),
+        status:country_doc.getRange('C26').getValue()
+    },
+    city_3:{
+        city_name:country_doc.getRange('D8').getValue().toString().trim(),
+        shield:country_doc.getRange('D25').getValue(),
+        status:country_doc.getRange('D26').getValue()
+    },
+    city_4:{
+      city_name:country_doc.getRange('E8').getValue().toString().trim(),
+      shield:country_doc.getRange('E25').getValue(),
+      status:country_doc.getRange('E26').getValue()
+    }
+  }
+  console.log(country)
   return country;
 }
+
+// function get_country_info(){
+//   var doc1 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Лист информации.')
+
+//   var rocket_tech=false;
+//   var rockets=0;
+//   var city_1={shield:parseInt(doc1.getRange('B25').getValue().toString()),status:parseFloat(doc1.getRange('B26').getValue().toString())}
+//   var city_2={shield:parseInt(doc1.getRange('C25').getValue().toString()),status:parseFloat(doc1.getRange('C26').getValue().toString())}
+//   var city_3={shield:parseInt(doc1.getRange('D25').getValue().toString()),status:parseFloat(doc1.getRange('D26').getValue().toString())}
+//   var city_4={shield:parseInt(doc1.getRange('E25').getValue().toString()),status:parseFloat(doc1.getRange('E26').getValue().toString())}
+//   var money = 160;
+
+//   var country = {
+//     rocket_tech:rocket_tech,
+//     rockets:rockets,
+//     city_1:city_1,
+//     city_2:city_2,
+//     city_3:city_3,
+//     city_4:city_4,
+//     money:money,
+//   }
+//   return country;
+// }
+function rocket_to(from_,to_){
+  if(from_.rockets>0 && from_.rocket_tech===true){
+      if(to_.length>0){
+        for(let city of to_){
+          if(city.shield>0){
+            city.shield-=1
+            city.status-=0.3
+          }
+          else{
+            city.status=0;
+          }
+          from_.rockets-=1
+        }
+      }
+  }
+}
+
+function gameround(doc,country){
+  country.money-=parseInt(doc.getRange("I5").getValue().toString())
+
+    if(doc.getRange("E13").getValue()=="Да"){
+      country.rocket_tech = true
+    }
+    if(doc.getRange("G14").getValue()==true){
+      country.city_1.shield+=1
+    }
+    if(doc.getRange("G15").getValue()==true){
+      country.city_2.shield+=1
+    }
+    if(doc.getRange("G16").getValue()==true){
+      country.city_3.shield+=1
+    }
+    if(doc.getRange("G17").getValue()==true){
+      country.city_4.shield+=1
+    }
+    if(doc.getRange("C10").getValue()=="Да"){
+      country.city_1.status+=0.25
+    }
+    if(doc.getRange("E10").getValue()=="Да"){
+      country.city_2.status+=0.25
+    }
+    if(doc.getRange("F10").getValue()=="Да"){
+      country.city_3.status+=0.25
+    }
+    if(doc.getRange("G10").getValue()=="Да"){
+      country.city_4.status+=0.25
+    }
+    if(doc.getRange("G13").getValue()>0){
+      country.rockets+=doc.getRange("G13").getValue()
+    }
+    if(doc.getRange("I20").getValue()==2){
+      // rocket_to(country,)
+    }
+    country.money+=(300*country.city_1.status)+(300*country.city_2.status)+(300*country.city_3.status)+(300*country.city_4.status)
+}
+
 function update_country_info(){
-  country = get_country_info()
+  // country = get_country_info()
+  country = get_country(SpreadsheetApp.getActiveSpreadsheet());
+
   var doc1 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Лист информации.')
   var doc2 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Первый ход.')
   var doc3 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Второй ход.')
@@ -31,225 +147,47 @@ function update_country_info(){
   var doc6 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Пятый ход.')
   var doc7 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Шестой ход.')
   
-  // var world_doc = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1hxxIlHxJ1ZuIrkddn30twDj9Y_iTLmvHSwc1XDUdDXw/edit')
-  // console.log(world_doc.getSheetByName('Лист информации.').getRange("I5").getValue()==="Да"?true:false)
-  
-  // doc1.getRange("B11").setValue(country.city_1.status)
-  // doc1.getRange("C11").setValue(country.city_2.status)
-  // doc1.getRange("D11").setValue(country.city_3.status)
-  // doc1.getRange("E11").setValue(country.city_4.status)
-  
-  // doc1.getRange("B10").setValue(country.city_1.shield>0?"Щит":"Не Щит")
-  // doc1.getRange("C10").setValue(country.city_2.shield>0?"Щит":"Не Щит")
-  // doc1.getRange("D10").setValue(country.city_3.shield>0?"Щит":"Не Щит")
-  // doc1.getRange("E10").setValue(country.city_4.shield>0?"Щит":"Не Щит")
-  
-  // doc1.getRange("C18").setValue(country.rocket_tech==true?"Да":"Нет")
-  
-  country.money+=(300*country.city_1.status)+(300*country.city_2.status)+(300*country.city_3.status)+(300*country.city_4.status)
-  // doc1.getRange("G5").setValue(country.money)
 
   if(doc1.getRange("K7").getValue()===true && doc2.getRange("M8").getValue()===true){
     //first round
-    country.money-=parseInt(doc2.getRange("I5").getValue().toString())
-
-    if(doc2.getRange("E13").getValue()=="Да"){
-      country.rocket_tech = true
-    }
-    if(doc2.getRange("G14").getValue()==true){
-      country.city_1.shield+=1
-    }
-    if(doc2.getRange("G15").getValue()==true){
-      country.city_2.shield+=1
-    }
-    if(doc2.getRange("G16").getValue()==true){
-      country.city_3.shield+=1
-    }
-    if(doc2.getRange("G17").getValue()==true){
-      country.city_4.shield+=1
-    }
-    if(doc2.getRange("C10").getValue()=="Да"){
-      country.city_1.status+=0.25
-    }
-    if(doc2.getRange("E10").getValue()=="Да"){
-      country.city_2.status+=0.25
-    }
-    if(doc2.getRange("F10").getValue()=="Да"){
-      country.city_3.status+=0.25
-    }
-    if(doc2.getRange("G10").getValue()=="Да"){
-      country.city_4.status+=0.25
-    }
-    country.money+=(300*country.city_1.status)+(300*country.city_2.status)+(300*country.city_3.status)+(300*country.city_4.status)
+    gameround(doc2,country)
+  }
+  else{
+    country.rocket_tech=false;
+    country.rockets=0;
+    country.city_1.shield=0;
+    country.city_2.shield=0;
+    country.city_3.shield=0;
+    country.city_4.shield=0;
+    country.city_1.status=1;
+    country.city_2.status=0.8;
+    country.city_3.status=0.6;
+    country.city_4.status=0.4;
+    country.money=160+300*country.city_1.status+300*country.city_2.status+300*country.city_3.status+300*country.city_4.status;
+    
   }
   if(doc1.getRange("K7").getValue()===true && doc1.getRange("J7").getValue()===true && doc3.getRange("M8").getValue()===true){
     //second(2) round
-    country.money-=parseInt(doc3.getRange("I5").getValue().toString())
-
-    if(doc3.getRange("E13").getValue()=="Да"){
-      country.rocket_tech = true
-    }
-    if(doc3.getRange("G14").getValue()==true){
-      country.city_1.shield+=1
-    }
-    if(doc3.getRange("G15").getValue()==true){
-      country.city_2.shield+=1
-    }
-    if(doc3.getRange("G16").getValue()==true){
-      country.city_3.shield+=1
-    }
-    if(doc3.getRange("G17").getValue()==true){
-      country.city_4.shield+=1
-    }
-    if(doc3.getRange("C10").getValue()=="Да"){
-      country.city_1.status+=0.25
-    }
-    if(doc3.getRange("E10").getValue()=="Да"){
-      country.city_2.status+=0.25
-    }
-    if(doc3.getRange("F10").getValue()=="Да"){
-      country.city_3.status+=0.25
-    }
-    if(doc3.getRange("G10").getValue()=="Да"){
-      country.city_4.status+=0.25
-    }
-    country.money+=(300*country.city_1.status)+(300*country.city_2.status)+(300*country.city_3.status)+(300*country.city_4.status)
-
+    gameround(doc3,country)
   }
   if(doc1.getRange("K7").getValue()===true &&  doc1.getRange("J7").getValue()===true  && doc1.getRange("I10").getValue()===true && doc4.getRange("M8").getValue()===true){
     //third(3) round
-    country.money-=parseInt(doc4.getRange("I5").getValue().toString())
-
-    if(doc4.getRange("E13").getValue()=="Да"){
-      country.rocket_tech = true
-    }
-    if(doc4.getRange("G14").getValue()==true){
-      country.city_1.shield+=1
-    }
-    if(doc4.getRange("G15").getValue()==true){
-      country.city_2.shield+=1
-    }
-    if(doc4.getRange("G16").getValue()==true){
-      country.city_3.shield+=1
-    }
-    if(doc4.getRange("G17").getValue()==true){
-      country.city_4.shield+=1
-    }
-    if(doc4.getRange("C10").getValue()=="Да"){
-      country.city_1.status+=0.25
-    }
-    if(doc4.getRange("E10").getValue()=="Да"){
-      country.city_2.status+=0.25
-    }
-    if(doc4.getRange("F10").getValue()=="Да"){
-      country.city_3.status+=0.25
-    }
-    if(doc4.getRange("G10").getValue()=="Да"){
-      country.city_4.status+=0.25
-    }
-    country.money+=(300*country.city_1.status)+(300*country.city_2.status)+(300*country.city_3.status)+(300*country.city_4.status)
+    gameround(doc4,country)
 
   }
   if(doc1.getRange("K7").getValue()===true &&  doc1.getRange("J7").getValue()===true  && doc1.getRange("I10").getValue()===true && doc1.getRange("I12").getValue()===true && doc5.getRange("M8").getValue()===true){
     //fourth(4) round
-    country.money-=parseInt(doc5.getRange("I5").getValue().toString())
+    gameround(doc5,country)
 
-    if(doc5.getRange("E13").getValue()=="Да"){
-      country.rocket_tech = true
-    }
-    if(doc5.getRange("G14").getValue()==true){
-      country.city_1.shield+=1
-    }
-    if(doc5.getRange("G15").getValue()==true){
-      country.city_2.shield+=1
-    }
-    if(doc5.getRange("G16").getValue()==true){
-      country.city_3.shield+=1
-    }
-    if(doc5.getRange("G17").getValue()==true){
-      country.city_4.shield+=1
-    }
-    if(doc5.getRange("C10").getValue()=="Да"){
-      country.city_1.status+=0.25
-    }
-    if(doc5.getRange("E10").getValue()=="Да"){
-      country.city_2.status+=0.25
-    }
-    if(doc5.getRange("F10").getValue()=="Да"){
-      country.city_3.status+=0.25
-    }
-    if(doc5.getRange("G10").getValue()=="Да"){
-      country.city_4.status+=0.25
-    }
-    country.money+=(300*country.city_1.status)+(300*country.city_2.status)+(300*country.city_3.status)+(300*country.city_4.status)
   }
   if(doc1.getRange("K7").getValue()===true &&  doc1.getRange("J7").getValue()===true  && doc1.getRange("I10").getValue()===true && doc1.getRange("I12").getValue()===true && doc1.getRange("I15").getValue()===true && doc6.getRange("M8").getValue()===true){
     //fifth(5) round
-    country.money-=parseInt(doc6.getRange("I5").getValue().toString())
-
-    if(doc6.getRange("E13").getValue()=="Да"){
-      country.rocket_tech = true
-    }
-    if(doc6.getRange("G14").getValue()==true){
-      country.city_1.shield+=1
-    }
-    if(doc6.getRange("G15").getValue()==true){
-      country.city_2.shield+=1
-    }
-    if(doc6.getRange("G16").getValue()==true){
-      country.city_3.shield+=1
-    }
-    if(doc6.getRange("G17").getValue()==true){
-      country.city_4.shield+=1
-    }
-    if(doc6.getRange("C10").getValue()=="Да"){
-      country.city_1.status+=0.25
-    }
-    if(doc6.getRange("E10").getValue()=="Да"){
-      country.city_2.status+=0.25
-    }
-    if(doc6.getRange("F10").getValue()=="Да"){
-      country.city_3.status+=0.25
-    }
-    if(doc6.getRange("G10").getValue()=="Да"){
-      country.city_4.status+=0.25
-    }
-    country.money+=(300*country.city_1.status)+(300*country.city_2.status)+(300*country.city_3.status)+(300*country.city_4.status)
+    gameround(doc6,country)
 
   }
   if(doc1.getRange("K7").getValue()===true &&  doc1.getRange("J7").getValue()===true  && doc1.getRange("I10").getValue()===true && doc1.getRange("I12").getValue()===true && doc1.getRange("I15").getValue()===true && doc1.getRange("I18").getValue()===true && doc7.getRange("M8").getValue()===true){
     //sixth(6) round
-    country.money-=parseInt(doc7.getRange("I5").getValue().toString())
-
-    if(doc7.getRange("E13").getValue()=="Да"){
-      country.rocket_tech = true
-    }
-    if(doc7.getRange("G14").getValue()==true){
-      country.city_1.shield+=1
-    }
-    if(doc7.getRange("G15").getValue()==true){
-      country.city_2.shield+=1
-    }
-    if(doc7.getRange("G16").getValue()==true){
-      country.city_3.shield+=1
-    }
-    if(doc7.getRange("G17").getValue()==true){
-      country.city_4.shield+=1
-    }
-    if(doc7.getRange("C10").getValue()=="Да"){
-      country.city_1.status+=0.25
-    }
-    if(doc7.getRange("E10").getValue()=="Да"){
-      country.city_2.status+=0.25
-    }
-    if(doc7.getRange("F10").getValue()=="Да"){
-      country.city_3.status+=0.25
-    }
-    if(doc7.getRange("G10").getValue()=="Да"){
-      country.city_4.status+=0.25
-    }
-    country.money+=(300*country.city_1.status)+(300*country.city_2.status)+(300*country.city_3.status)+(300*country.city_4.status)
-
+    gameround(doc7,country)
   }
   
   
@@ -258,26 +196,36 @@ function update_country_info(){
   // // }
   
   doc1.getRange("G5").setValue(country.money)
-  doc1.getRange("B11").setValue(country.city_1.status)
-  doc1.getRange("C11").setValue(country.city_2.status)
-  doc1.getRange("D11").setValue(country.city_3.status)
-  doc1.getRange("E11").setValue(country.city_4.status)
+  doc1.getRange("B26").setValue(country.city_1.status)
+  doc1.getRange("C26").setValue(country.city_2.status)
+  doc1.getRange("D26").setValue(country.city_3.status)
+  doc1.getRange("E26").setValue(country.city_4.status)
   
-  doc1.getRange("B10").setValue(country.city_1.shield>0?"Щит":"Не Щит")
-  doc1.getRange("C10").setValue(country.city_2.shield>0?"Щит":"Не Щит")
-  doc1.getRange("D10").setValue(country.city_3.shield>0?"Щит":"Не Щит")
-  doc1.getRange("E10").setValue(country.city_4.shield>0?"Щит":"Не Щит")
+  doc1.getRange("B25").setValue(country.city_1.shield)
+  doc1.getRange("C25").setValue(country.city_2.shield)
+  doc1.getRange("D25").setValue(country.city_3.shield)
+  doc1.getRange("E25").setValue(country.city_4.shield)
+
+  doc1.getRange("E18").setValue(country.rockets)
   
   doc1.getRange("C18").setValue(country.rocket_tech==true?"Да":"Нет")
   
+  if(country.rocket_tech==true){
+    doc3.getRange("E13").protect()
+    doc4.getRange("E13").protect()
+    doc5.getRange("E13").protect()
+    doc6.getRange("E13").protect()
+    doc7.getRange("E13").protect()
+  }
+
   console.log(country)
 
 }
 
 function cityfunction() {
   // Create a new Google Doc named 'Hello, world!'
-  var doc = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Первый ход.').getRange("E18").getValues()[0][0].split(',').filter(n=>n)
-  var doc2 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Первый ход.').getRange("K20").getValues()[0][0].split(',').filter(n=>n)
+  var doc = SpreadsheetApp.getActiveSheet().getRange("E18").getValues()[0][0].split(',').filter(n=>n)
+  var doc2 = SpreadsheetApp.getActiveSheet().getRange("K20").getValues()[0][0].split(',').filter(n=>n)
   console.log(doc)
   if(doc.length<1){
     SpreadsheetApp.getActiveSheet().getRange("E18").setValue('Напишите сюда города!(через запятые)')
@@ -319,10 +267,10 @@ function onEdit(e){
   var range = e.range;
   // var spreadSheet = e.source;
   if(range.getColumn() == 5 && range.getRow() == 18 ){
-    SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Первый ход.').getRange("K18").setValue([cityfunction()])
+    SpreadsheetApp.getActiveSheet().getRange("K18").setValue([cityfunction()])
   }
   if(range.getColumn() == 5 && range.getRow() == 19 ){
-    SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Первый ход.').getRange("K19").setValue([countryfunction()])
+    SpreadsheetApp.getActiveSheet().getRange("K19").setValue([countryfunction()])
   }
   if(range.getColumn() == 11){
     update_country_info()
